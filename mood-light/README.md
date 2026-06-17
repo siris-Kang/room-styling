@@ -28,7 +28,7 @@
 
 차가운 흰빛이 아닌 따뜻한 웜화이트 조명 사용
 
-ESP32-C3, BLE, USB-C 어댑터 사용
+ESP32-WROOM-32E 기반 DevKit, BLE, 5V 어댑터 사용
 
 개발 환경은 ESP-IDF 기반
 
@@ -36,7 +36,7 @@ ESP32-C3, BLE, USB-C 어댑터 사용
 
 ### MCU
 
-ESP32-C3 DevKit 개발보드
+ESP32-WROOM-32E 기반 DevKit 개발보드
 
 선정 이유
 
@@ -45,15 +45,18 @@ ESP32-C3 DevKit 개발보드
 * ESP-IDF 지원
 * FreeRTOS 기반 개발 가능
 * 공식 예제와 문서 기반으로 초기 개발이 쉬움
-* USB를 통한 펌웨어 업로드와 시리얼 모니터링이 편리함
-* Super Mini 보드보다 핀맵 확인과 전원 안정성 측면에서 초기 실습에 유리함
+* USB-UART를 통한 펌웨어 업로드와 시리얼 모니터링이 편리함
+* 모듈 단품보다 개발보드 형태가 핀맵 확인, USB 연결, 전원 안정성 측면이 좋음
 
 주의 사항
 
-* ESP32-C3는 ARM Cortex-M 계열이 아니라 RISC-V 기반 MCU임
-* GPIO는 3.3V 로직으로 동작하므로 외부 모듈 제어 신호도 3.3V 입력을 지원해야 함
-* LED 스트립 전류는 ESP32-C3 GPIO 또는 3.3V 핀에서 직접 공급하지 않음
+* ESP32-WROOM-32E는 Xtensa LX6 듀얼 코어 기반 ESP32 모듈임
+* GPIO는 3.3V 로직으로 동작, 외부 모듈 제어 신호도 3.3V 입력을 지원해야 함
+* LED 스트립 전류는 ESP32-WROOM-32E GPIO 또는 3.3V 핀에서 직접 공급하지 않음
 * PWM 출력 핀은 실제 DevKit 보드에 노출된 GPIO 중 LEDC PWM 사용이 가능한 핀으로 선정함
+* PWM 후보 핀은 GPIO 16, 17, 18, 19, 21, 22, 23, 25, 26, 27, 32, 33 중 실제 보드에 노출된 핀으로 우선 검토함
+* GPIO 34 ~ 39는 입력 전용이므로 PWM 출력용으로 사용하지 않음
+* 부팅 스트랩 핀(GPIO 0, 2, 4, 5, 12, 15)은 외부 회로 연결 시 부팅 상태에 영향을 줄 수 있으므로 우선 피함
 
 ### LED 구동부
 
@@ -61,7 +64,7 @@ MOSFET 트리거 스위치 PWM 제어 모듈
 
 역할
 
-* ESP32-C3 GPIO의 3.3V PWM 신호 수신
+* ESP32-WROOM-32E GPIO의 3.3V PWM 신호 수신
 * LED 스트립 전류 제어
 * 밝기 조절 수행
 * MCU GPIO가 LED 스트립 전류를 직접 부담하지 않도록 분리
@@ -71,7 +74,7 @@ MOSFET 트리거 스위치 PWM 제어 모듈
 * MOSFET 단품, 게이트 저항, 풀다운 저항을 직접 구성하지 않아도 됨
 * VIN, OUT, SIG, GND 단자가 있어 배선이 단순함
 * PWM 입력을 지원하므로 LED 밝기 제어에 적합함
-* 3.3V High 신호를 지원하는 모듈이므로 ESP32-C3 GPIO로 제어 가능함
+* 3.3V High 신호를 지원하는 모듈이므로 ESP32-WROOM-32E GPIO로 제어 가능함
 
 기본 연결
 
@@ -79,8 +82,8 @@ MOSFET 트리거 스위치 PWM 제어 모듈
 * VIN- : 5V 어댑터 -
 * OUT+ : LED 스트립 +
 * OUT- : LED 스트립 -
-* SIG : ESP32-C3 PWM GPIO
-* GND : ESP32-C3 GND와 공통 연결
+* SIG : ESP32-WROOM-32E PWM GPIO
+* GND : ESP32-WROOM-32E GND와 공통 연결
 
 주의 사항
 
@@ -93,7 +96,7 @@ MOSFET 트리거 스위치 PWM 제어 모듈
 ```text
 스마트폰 앱 또는 nRF Connect
     ↓ BLE
-ESP32-C3 DevKit
+ESP32-WROOM-32E DevKit
     ↓ PWM GPIO
 MOSFET 트리거 스위치 PWM 제어 모듈
     ↓
@@ -103,13 +106,13 @@ MOSFET 트리거 스위치 PWM 제어 모듈
 전원 구조
 
 ```text
-USB-C 5V 어댑터
-    ├── ESP32-C3 DevKit
+5V 어댑터
+    ├── ESP32-WROOM-32E DevKit
     └── MOSFET 모듈 VIN+ / VIN-
             ↓
         LED 스트립 OUT+ / OUT-
 
-ESP32-C3 GND와 MOSFET 모듈 GND 공통 연결
+ESP32-WROOM-32E GND와 MOSFET 모듈 GND 공통 연결
 ```
 
 ## 6. 사용 예정 기술
@@ -129,7 +132,7 @@ BLE 사용
 
 사용 목적
 
-* 스마트폰 앱과 ESP32-C3 연결
+* 스마트폰 앱과 ESP32-WROOM-32E 연결
 * 전원 ON/OFF 명령 수신
 * 밝기 값 수신
 * 타이머 설정값 수신
@@ -141,7 +144,7 @@ BLE 사용
 
 ### 밝기 제어
 
-ESP32-C3 LEDC PWM 사용
+ESP32-WROOM-32E LEDC PWM 사용
 
 제어 방식
 
@@ -183,7 +186,7 @@ NVS 사용 예정
 
 ## 8. 초기 개발 순서
 
-1. ESP32-C3 개발보드 환경 설정
+1. ESP32-WROOM-32E 개발보드 환경 설정
 2. Blink 예제 실행
 3. LEDC PWM 예제 실행
 4. MOSFET을 이용한 LED 스트립 밝기 제어
@@ -198,11 +201,11 @@ NVS 사용 예정
 
 ### 필수 부품
 
-* ESP32-C3 DevKit 개발보드
+* ESP32-WROOM-32E 기반 DevKit 개발보드
 * 5V 웜화이트 COB LED 스트립
 * MOSFET 트리거 스위치 PWM 제어 모듈
-* USB-C 5V 2A 이상 어댑터
-* USB-C 케이블
+* 5V 2A 이상 어댑터
+* 개발보드에 맞는 USB 케이블
 * 전선
 * 점퍼선
 * 브레드보드 또는 만능기판
@@ -223,9 +226,9 @@ NVS 사용 예정
 
 해당 모듈은 MOSFET, 부하 연결 단자, PWM 제어 입력 단자를 포함하고 있으므로 LED 스트립 제어 회로를 직접 구성할 필요가 없다.
 
-ESP32-C3의 PWM GPIO는 MOSFET 모듈의 SIG 입력에 연결하고, LED 스트립 전류는 MOSFET 모듈을 통해 제어한다.
+ESP32-WROOM-32E의 PWM GPIO는 MOSFET 모듈의 SIG 입력에 연결하고, LED 스트립 전류는 MOSFET 모듈을 통해 제어한다.
 
-ESP32-C3 GPIO 또는 3.3V 핀에서 LED 스트립 전류를 직접 공급하지 않는다.
+ESP32-WROOM-32E GPIO 또는 3.3V 핀에서 LED 스트립 전류를 직접 공급하지 않는다.
 
 ## 10. 안전성 및 신뢰성
 
@@ -247,11 +250,11 @@ ESP32-C3 GPIO 또는 3.3V 핀에서 LED 스트립 전류를 직접 공급하지 
 
 ### 전원 안정성
 
-USB-C 5V 어댑터 기반 전원 공급
+5V 어댑터 기반 전원 공급
 
 배터리 내장 구조는 초기 버전에서 제외
 
-ESP32-C3와 LED 스트립의 GND 공통 연결
+ESP32-WROOM-32E와 LED 스트립의 GND 공통 연결
 
 LED 전류는 GPIO가 아닌 MOSFET을 통해 제어
 
@@ -281,7 +284,7 @@ BLE 명령값 범위 검증
 
 잘못된 BLE Write 요청 무시
 
-타이머 동작은 앱이 아닌 ESP32-C3 내부에서 처리
+타이머 동작은 앱이 아닌 ESP32-WROOM-32E 내부에서 처리
 
 BLE 연결이 끊겨도 자동 꺼짐 동작 유지
 
